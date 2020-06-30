@@ -1,0 +1,9 @@
+POST http://localhost:3001/api/songs
+Content-Type: application/json
+
+{
+    "id": "song-1",
+    "title": "this came from the REST client",
+    "artist": "VS Code plugin",
+    "duration": "1:23"
+}
