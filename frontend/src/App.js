@@ -55,7 +55,7 @@ const App = () => {
   const voteUpdate = (id,vote) =>{
     const url = baseUrl + `/${id}`
     console.log(url)
-    axios.patch(url, {vote})   // change from PUT to PATCH later
+    axios.patch(url, {vote})
     .then(response =>{
       getSongPool()
     })
