@@ -14,8 +14,8 @@ export default function SongSearch(props){
         setQuery(e.target.value)
     }
     return(
-        <div class=" max-w-xs  pl-4 pr-2 shadow rounded-lg bg-white">
-            <div class="flex items-center relative justify-center pt-2">
+        <div class=" max-w-sm  pl-4 pr-2 shadow rounded-lg bg-white">
+            <div class="flex items-center relative justify-center py-2" >
                 <form onSubmit={handleSubmit}>
                     <input type="text" placeholder="Search for a song" class="rounded-lg focus:outline-none" onChange={handleChange}></input>
                     <button type="submit" class="focus:outline-none " >
@@ -26,7 +26,7 @@ export default function SongSearch(props){
                 </form>
                 
             </div>
-            <div class="h-64" >
+            <div style={{height: '20rem'}}>
                 <Scrollbars autoHide>
                     {props.componentList}
                 </Scrollbars>

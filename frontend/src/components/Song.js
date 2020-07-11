@@ -1,15 +1,14 @@
 import React from "react";
-import cover from '../placeholder.jpg';
 import { useState } from "react";
 
 function Song(props){
     return(
         <div class="flex py-2 items-center border-t">
-            <img src={cover} alt="album cover" class=" w-16 mr-4"/>
-            <div class="antialised mr-16 text-sm">
-                <p class="text-gray-900">{props.title}</p>
-                <p class="text-gray-600">{props.artist}</p>
-                <p class="text-gray-400">{props.duration}</p>
+            <img src={props.cover} alt="album cover" class=" w-20 mr-4"/>
+            <div class="antialised mr-8 text-sm" style={{overflow:'hidden', whiteSpace:'nowrap'}}>
+                <p class="text-gray-900 font-semibold pb-1" >{props.title} </p>
+                <p class="text-gray-600 pb-1">{props.artist}</p>
+                <p class="text-gray-400 pb-1">{props.duration}</p>
             </div>
             {props.button}
         </div>
@@ -18,7 +17,7 @@ function Song(props){
 
 export function QueueSong(props){
     return(
-        <Song title={props.title} artist={props.artist} duration={props.duration} 
+        <Song title={props.title} artist={props.artist} duration={props.duration} cover = {props.cover}
         button = 
         {
         <button class="ml-auto mr-3 focus:outline-none">
@@ -46,7 +45,7 @@ export function PoolSong(props){
     }
 
     return(
-        <Song title={props.title} artist={props.artist} duration={props.duration} 
+        <Song title={props.title} artist={props.artist} duration={props.duration} cover = {props.cover}
         button = 
         {<div class="flex ml-auto mr-3 items-center">
             <button onClick={(e) => handleClick(e)} class="mr-1 focus:outline-none">
@@ -64,12 +63,12 @@ export function PoolSong(props){
 
 export function SearchResultSong(props){
     const handleClick= e => {
-        const songData={id:props.id, title:props.title, artist:props.artist, duration:props.duration}
+        const songData={id:props.id, title:props.title, artist:props.artist, duration:props.duration, cover: props.cover}
         props.addSong(songData)
     }
 
     return(
-        <Song title={props.title} artist={props.artist} duration={props.duration} 
+        <Song title={props.title} artist={props.artist} duration={props.duration} cover = {props.cover}
         button = 
         {<button onClick={handleClick} class=" ml-auto mr-3 focus:outline-none">
         <svg class="h-4 w-4 fill-current text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

@@ -36,9 +36,14 @@ const App = () => {
   }
   
   const search = input => {
-    axios.get(baseUrl + `songs/${input}`)
+    axios.get(baseUrl + `search/${input}`)
     .then(res => {
-      setSearchResult([res.data])
+      console.log(res.data)
+      const searchResult = res.data.map(song => {
+        return ({id : song.id, title: song.name, artist: song.artists[0].name, duration: song.duration_ms, cover: song.album.images[1].url})
+      })
+      console.log('search result', searchResult)
+      setSearchResult(searchResult)
     })
     
   }
@@ -48,10 +53,10 @@ const App = () => {
   }
 
   const poolComponentList = poolList.map(song => (
-      <PoolSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} voteCount={song.voteCount} voteUpdate={voteUpdate} key={song.id} />))
+      <PoolSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} voteCount={song.voteCount} voteUpdate={voteUpdate} cover = {song.cover} key={song.id} />))
 
   const searchComponentList = searchResult.map(song => (
-        <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} />))
+        <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} cover={song.cover} />))
   
   return (
     <div className="App" class="bg-gray-200 grid">

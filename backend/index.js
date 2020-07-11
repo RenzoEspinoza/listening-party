@@ -1,6 +1,9 @@
 const express = require('express')
 const cors = require('cors')
 const { callbackify } = require('util')
+const axios = require('axios')
+const { response } = require('express')
+require('dotenv').config()
 
 const app = express()
 app.use(express.json())
@@ -9,49 +12,45 @@ app.use(express.static('build'))
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
-let songs = [
-  {
-    "id": "song-jYmHSg4GElhDEjcwZp3Tn",
-    "title": "hello",
-    "artist": "artist",
-    "duration": "1:11",
-    "dateAdded": 1592941124347
-  },
-  {
-    "id": "song-r06dKEZDE8uY9k4fQApGf",
-    "title": "world",
-    "artist": "artist",
-    "duration": "2:22",
-    "dateAdded": 1592941128725
-  },
-  {
-    "id": "song-ODs_wmon0Xweg0-d2cxxC",
-    "title": 'hello world',
-    "artist": "artist",
-    "duration": "1:11",
-    "dateAdded": 1592941136073
-  }
-]
+const client_id = '8044283a858a43218c09deb9403590a1'
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET
+let token = ''
 
+if(!token) axios({
+  url: 'https://accounts.spotify.com/api/token',
+  method: 'post',
+  params: {
+    grant_type: 'client_credentials',
+    client_id: client_id,
+    client_secret: client_secret
+  },
+  headers : {
+    "Content-Type": "application/x-www-form-urlencoded"
+  }
+}).then(res => {
+  token = res.data.access_token
+  console.log(token)
+}).catch(error => {
+  console.log(error)
+})
 let pool = []
 
+app.get('/api/search/:query', (req, res) => {
+  const query = encodeURIComponent(req.params.query)
+  console.log(query)
+  axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=5`, {headers: {'Authorization': `Bearer ${token}`}})
+  .then(response => {
+    res.json(response.data.tracks.items)})
+  .catch(error =>{
+    console.log(error);;
+  })
+})
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/songs', (req, res) => {
-  res.json(songs)
-})
-
 app.get('/api/pool', (req, res) => {
   res.json(pool)
-})
-
-app.get('/api/songs/:query', (req, res) => {
-  const query = req.params.query
-  const song = songs.find(song => song.title === query)
-  if (song) {res.json(song)} 
-  else {res.status(404).end()}
 })
 
 app.delete('/api/songs/:id', (req, res) => {
@@ -83,9 +82,7 @@ io.on('connection', socket => {
 })
 
 const addSong = song => {
-  console.log(pool)
   const duplicate = pool.some(s => s.id === song.id)
-  console.log('duplicate:', duplicate)
   if(duplicate){
     return 'Error: song already exists in pool'
   }
@@ -95,6 +92,7 @@ const addSong = song => {
     title: song.title,
     artist: song.artist,
     duration: song.duration,
+    cover: song.cover,
     voteCount: 0,
     dateAdded: Date.now()
   }
