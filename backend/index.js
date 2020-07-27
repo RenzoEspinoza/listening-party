@@ -15,28 +15,34 @@ const client_secret = process.env.SPOTIFY_CLIENT_SECRET
 const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/'
 
 let token = ''
+getClientCredToken()
 
-axios({
-  url: 'https://accounts.spotify.com/api/token',
-  method: 'post',
-  params: {
-    grant_type: 'client_credentials',
-    client_id: client_id,
-    client_secret: client_secret
-  },
-  headers : {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
-}).then(res => {
-  token = res.data.access_token
-  console.log('token', token)
-}).catch(error => {
-  console.log(error)
-})
 
 let pool = []
 let currentlyPlaying = null
 let timeStarted = null
+
+function getClientCredToken(){
+  axios({
+    url: 'https://accounts.spotify.com/api/token',
+    method: 'post',
+    params: {
+      grant_type: 'client_credentials',
+      client_id: client_id,
+      client_secret: client_secret
+    },
+    headers : {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }).then(res => {
+    token = res.data.access_token
+    console.log('token', token)
+    setTimeout(getClientCredToken, res.data.expires_in * 1000)
+    
+  }).catch(error => {
+    console.log(error)
+})
+}
 
 app.get('/auth/spotify', (req,res) => {
   const scopes = 'user-modify-playback-state user-read-playback-state'
