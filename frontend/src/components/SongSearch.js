@@ -1,16 +1,16 @@
-import React from "react";
-import Scrollbars from "react-custom-scrollbars";
-import { useState } from "react";
+import React from "react"
+import Scrollbars from "react-custom-scrollbars"
+import { useState } from "react"
 
 export default function SongSearch(props){
     const [query, setQuery] = useState('')
 
-    const handleSubmit = e =>{
+    function handleSubmit(e) {
         e.preventDefault()
         if(query.length > 0) props.search(query)
     }
 
-    const handleChange = e => {
+    function handleChange(e) {
         setQuery(e.target.value)
     }
     return(
@@ -26,7 +26,7 @@ export default function SongSearch(props){
                 </form>
                 
             </div>
-            <div style={{height: '20rem'}}>
+            <div style={{height: '26rem'}}>
                 <Scrollbars autoHide>
                     {props.componentList}
                 </Scrollbars>

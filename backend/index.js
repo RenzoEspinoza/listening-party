@@ -1,8 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { callbackify } = require('util')
 const axios = require('axios')
-const { response } = require('express')
 require('dotenv').config()
 
 const app = express()
@@ -14,9 +12,11 @@ const io = require('socket.io')(server)
 
 const client_id = '8044283a858a43218c09deb9403590a1'
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET
+const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/'
+
 let token = ''
 
-if(!token) axios({
+axios({
   url: 'https://accounts.spotify.com/api/token',
   method: 'post',
   params: {
@@ -25,32 +25,75 @@ if(!token) axios({
     client_secret: client_secret
   },
   headers : {
-    "Content-Type": "application/x-www-form-urlencoded"
+    'Content-Type': 'application/x-www-form-urlencoded'
   }
 }).then(res => {
   token = res.data.access_token
-  console.log(token)
+  console.log('token', token)
 }).catch(error => {
   console.log(error)
 })
+
 let pool = []
+let currentlyPlaying = null
+let timeStarted = null
+
+app.get('/auth/spotify', (req,res) => {
+  const scopes = 'user-modify-playback-state user-read-playback-state'
+  res.redirect('https://accounts.spotify.com/authorize' +
+  '?response_type=code' +
+  '&client_id=' + client_id +
+  (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+  '&redirect_uri=' + encodeURIComponent(redirect_uri))
+})
+
+app.get('/auth/spotify/callback', (req, res) => {
+  const code = req.query.code || null
+  axios({
+    url: 'https://accounts.spotify.com/api/token',
+    method: 'POST',
+    params: {
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri
+    },
+    headers : {
+      Accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + ( Buffer.from(
+        client_id+ ':' + client_secret
+      ).toString('base64'))
+    }
+  }).then(response => {
+    const access_token = response.data.access_token
+    const uri = process.env.FRONTEND_URI || 'http://localhost:3000'
+    res.redirect(uri + '?access_token=' + access_token)
+  }).catch(error => {
+    console.log(error);
+  })
+})
 
 app.get('/api/search/:query', (req, res) => {
   const query = encodeURIComponent(req.params.query)
-  console.log(query)
-  axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=5`, {headers: {'Authorization': `Bearer ${token}`}})
+  axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {headers: {'Authorization': `Bearer ${token}`}})
   .then(response => {
     res.json(response.data.tracks.items)})
   .catch(error =>{
     console.log(error);;
   })
 })
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1>')
-})
 
 app.get('/api/pool', (req, res) => {
   res.json(pool)
+})
+
+app.get('/api/currentSong', (req, res) => {
+  res.json(currentlyPlaying)
+})
+
+app.get('/api/elapsedTime', (req, res) => {
+  const elapsedTime = Date.now() - timeStarted
+  res.json(elapsedTime)
 })
 
 app.delete('/api/songs/:id', (req, res) => {
@@ -65,9 +108,29 @@ app.post('/api/pool', (req, res) => {
   res.status(204).end()
 })
 
+function songEnded() {
+  currentlyPlaying = pool.shift()
+  console.log('next song', currentlyPlaying)
+  if(currentlyPlaying){
+    io.emit('play song', currentlyPlaying)
+    setTimeout(songEnded, currentlyPlaying.duration)
+  }
+  else console.log('No song up next');
+  io.emit('pool update', pool)
+}
+
 io.on('connection', socket => {
   console.log('a user connected')
+
   socket.on('song add', (song, callback) => {
+    if(!currentlyPlaying){
+      io.emit('play song', song)
+      currentlyPlaying = song
+      timeStarted = Date.now()
+      console.log('set time started', timeStarted);
+      setTimeout(songEnded, song.duration)
+      return
+    }
     const error = addSong(song)
     if(error) return callback(error)
     sortPool()
@@ -81,7 +144,9 @@ io.on('connection', socket => {
   })
 })
 
-const addSong = song => {
+
+
+function addSong(song) {
   const duplicate = pool.some(s => s.id === song.id)
   if(duplicate){
     return 'Error: song already exists in pool'
@@ -99,11 +164,11 @@ const addSong = song => {
   pool.push(newSong)
 }
 
-const updateVote = (id, vote) => {
+function updateVote(id, vote) {
   pool = pool.map(song => {return (song.id === id) ? {...song, voteCount: (song.voteCount + vote)} : song})
 }
 
-const sortPool = () =>{
+function sortPool() {
   pool.sort(function(a,b) {
     const voteA = a.voteCount
     const voteB = b.voteCount

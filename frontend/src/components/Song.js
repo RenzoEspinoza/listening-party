@@ -1,5 +1,11 @@
-import React from "react";
-import { useState } from "react";
+import React from "react"
+import { useState } from "react"
+
+function millisToMin(millis) {
+    const minutes = Math.floor(millis / 60000)
+    const seconds = ((millis % 60000) / 1000).toFixed(0)
+    return (seconds === 60 ? (minutes+1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds)
+}
 
 function Song(props){
     return(
@@ -8,7 +14,7 @@ function Song(props){
             <div class="antialised mr-8 text-sm" style={{overflow:'hidden', whiteSpace:'nowrap'}}>
                 <p class="text-gray-900 font-semibold pb-1" >{props.title} </p>
                 <p class="text-gray-600 pb-1">{props.artist}</p>
-                <p class="text-gray-400 pb-1">{props.duration}</p>
+                <p class="text-gray-400 pb-1">{millisToMin(props.duration)}</p>
             </div>
             {props.button}
         </div>
@@ -66,6 +72,8 @@ export function SearchResultSong(props){
         const songData={id:props.id, title:props.title, artist:props.artist, duration:props.duration, cover: props.cover}
         props.addSong(songData)
     }
+    
+    
 
     return(
         <Song title={props.title} artist={props.artist} duration={props.duration} cover = {props.cover}

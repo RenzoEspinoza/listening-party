@@ -1,22 +1,7 @@
-import React from "react";
-import Scrollbars from "react-custom-scrollbars";
+import React from "react"
+import Scrollbars from "react-custom-scrollbars"
 
 export default function SongPool(props){
-    return(
-        <div class=" max-w-sm py-4 shadow rounded-lg bg-white">
-
-            <div class="px-4 pt-2" style={{height: '26rem'}}>   
-                <Scrollbars autoHide>
-                    {isEmpty(props.componentList)}
-                    {props.componentList}
-                </Scrollbars>
-                
-            </div>
-            
-            
-        </div>
-        
-    )
     function isEmpty(obj) {
             if(obj.length===0){
                 return(
@@ -26,4 +11,14 @@ export default function SongPool(props){
                 )
             }
     }
+    
+    return(
+            <div class="max-w-sm shadow rounded-lg bg-white p-4 pt-6" style={{height: '28.5rem'}}>   
+                <Scrollbars autoHide>
+                    {isEmpty(props.componentList)}
+                    {props.componentList}
+                </Scrollbars>
+            </div>
+    )
+    
 }
