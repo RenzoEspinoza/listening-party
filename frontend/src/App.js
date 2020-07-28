@@ -20,6 +20,7 @@ const App = () => {
   const [currentSong, setCurrentSong] = useState(null)
   const [deviceList, setDeviceList] = useState([])
   const [modalIsOpen,setIsOpen] = useState(false)
+  const [refreshToken, setRefreshToken] = useState(null)
 
   useEffect(() => {
     getSongPool()
@@ -28,9 +29,15 @@ const App = () => {
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
-    accessToken.current= new URLSearchParams(window.location.search).get('access_token')
-    console.log(accessToken.current)
-    if(accessToken.current) loggedIn.current = true
+    const params = new URLSearchParams(window.location.search)
+    console.log('params', params);
+    accessToken.current= params.get('access_token')
+    console.log('access token', accessToken.current)
+    if(accessToken.current){
+      loggedIn.current = true
+      console.log('refresh token',new URLSearchParams(window.location.search).get('refresh_token'))
+      setRefreshToken(new URLSearchParams(window.location.search).get('refresh_token'))
+    }
     socket.on('play song', song => {
       if(activeDevice.current){
         console.log('attempting to play')
@@ -72,6 +79,11 @@ const App = () => {
     }).catch(error => {
       if (error.response) {
         console.log(error.response.data)
+        if(error.response.data.error.message === "The access token expired"){
+          console.log('expired token');
+          refreshUserToken()
+          playSong()
+        }
         console.log(error.response.status)
         console.log(error.response.headers)
       } else if (error.request) {
@@ -141,6 +153,12 @@ const App = () => {
     }).catch(error => {
       if (error.response) {
         console.log(error.response.data)
+        // "The access token expired"
+        if(error.response.data.error.message === "The access token expired"){
+          console.log('expired token');
+          refreshUserToken()
+          getAvailableDevices()
+        }
         console.log(error.response.status)
         console.log(error.response.headers)
       } else if (error.request) {
@@ -148,6 +166,17 @@ const App = () => {
       } else {
         console.log('Error', error.message)
       }
+    })
+  }
+
+  function refreshUserToken(){
+    axios.get(baseUrl +`refreshToken/${refreshToken}` )
+    .then(res => {
+      accessToken.current = res.data
+    }).catch(error => {
+      console.log(error.response.data);
+      console.log(error.response.status)
+        console.log(error.response.headers)
     })
   }
 

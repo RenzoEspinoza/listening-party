@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const axios = require('axios')
+const { response } = require('express')
 require('dotenv').config()
 
 const app = express()
@@ -71,11 +72,38 @@ app.get('/auth/spotify/callback', (req, res) => {
       ).toString('base64'))
     }
   }).then(response => {
-    const access_token = response.data.access_token
+    const accessToken = response.data.access_token
+    const refreshToken = response.data.refresh_token
     const uri = process.env.FRONTEND_URI || 'http://localhost:3000'
-    res.redirect(uri + '?access_token=' + access_token)
+    res.redirect(uri + '?access_token=' + accessToken + '&refresh_token=' + refreshToken)
   }).catch(error => {
     console.log(error);
+  })
+})
+
+app.get('/api/refreshToken/:refreshToken', (req, res) => {
+  const refreshToken = req.params.refreshToken
+  console.log('refresh token', refreshToken);
+  axios({
+    url: 'https://accounts.spotify.com/api/token',
+    method: 'POST',
+    params: {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + ( Buffer.from(
+        client_id+ ':' + client_secret
+      ).toString('base64'))
+    }
+  }).then(response => {
+    console.log(response.data.access_token);
+    res.json(response.data.access_token)
+  }).catch(error => {
+    console.log(error.response.data);
+    console.log(error.response.status)
+        console.log(error.response.headers)
   })
 })
 
