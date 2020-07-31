@@ -7,7 +7,10 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "cd .. && git subtree push --prefix backend heroku master"
+    "deploy": "git push heroku master",
+    "build:ui": "rm -rf build && cd ../frontend && npm run build --prod && cp -r build ../backend/build/",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",    
+    "logs:prod": "heroku logs --tail"
   },
   "author": "Renzo Espinoza",
   "license": "MIT",
