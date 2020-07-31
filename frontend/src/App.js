@@ -14,13 +14,15 @@ let socket
 const App = () => {
   const [poolList, setPoolList] = useState([])
   const [searchResult, setSearchResult] = useState([])
-  const loggedIn = useRef(false)
-  const activeDevice = useRef(null)
-  const accessToken = useRef(null)
   const [currentSong, setCurrentSong] = useState(null)
   const [deviceList, setDeviceList] = useState([])
   const [modalIsOpen,setIsOpen] = useState(false)
+
+  const activeDevice = useRef(null)
+  const accessToken = useRef(null)
+  const loggedIn = useRef(false)
   const [refreshToken, setRefreshToken] = useState(null)
+
 
   useEffect(() => {
     getSongPool()
@@ -44,6 +46,7 @@ const App = () => {
         playSong(song.id)
       }
       setCurrentSong(song)
+      sessionStorage.removeItem(song.id)
     })
     
     return () => socket.disconnect()

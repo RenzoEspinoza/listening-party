@@ -37,8 +37,13 @@ export function QueueSong(props){
 }
 
 export function PoolSong(props){
-    const [isClicked, setClicked] = useState(false)
-    
+    const [isClicked, setClicked] = useState(() => JSON.parse(sessionStorage.getItem(props.id)) || false)
+
+    React.useEffect(() => {
+        sessionStorage.setItem(props.id, JSON.stringify(isClicked))
+      }, [isClicked]
+    );
+
     const handleClick = e =>{
         if(isClicked){
             props.voteUpdate(props.id, -1)

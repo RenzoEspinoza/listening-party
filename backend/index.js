@@ -42,7 +42,7 @@ function getClientCredToken(){
     
   }).catch(error => {
     console.log(error)
-})
+}) 
 }
 
 app.get('/auth/spotify', (req,res) => {
