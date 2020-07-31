@@ -2,9 +2,9 @@ const express = require('express')
 const cors = require('cors')
 const axios = require('axios')
 require('dotenv').config()
+const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
-const app = express()
 const path = require('path');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
@@ -28,7 +28,7 @@ else{
 
 app.use(express.json())
 app.use(cors())
-app.use(path.resolve(__dirname, '../frontend/build'))
+app.use(path.resolve(__dirname, 'build'))
 
 
 
