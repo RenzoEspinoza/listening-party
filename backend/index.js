@@ -1,15 +1,36 @@
 const express = require('express')
 const cors = require('cors')
 const axios = require('axios')
-const { response } = require('express')
 require('dotenv').config()
-
-const app = express()
-app.use(express.json())
-app.use(cors())
-app.use(express.static('build'))
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
+const app = express()
+const path = require('path');
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+const isDev = process.env.NODE_ENV !== 'production'
+const PORT = process.env.PORT || 3001
+
+if (!isDev && cluster.isMaster) {
+  console.error(`Node cluster master ${process.pid} is running`);
+
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
+  });
+
+}
+else{
+
+app.use(express.json())
+app.use(cors())
+app.use(path.resolve(__dirname, '../frontend/build'))
+
+
 
 const client_id = '8044283a858a43218c09deb9403590a1'
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET
@@ -212,7 +233,7 @@ function sortPool() {
   })
 }
 
-const PORT = process.env.PORT || 3001
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+}
