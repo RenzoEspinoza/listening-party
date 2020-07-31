@@ -8,7 +8,7 @@ import axios from 'axios'
 import io from 'socket.io-client'
 
 
-const baseUrl = 'http://localhost:3001/api/'
+const baseUrl = '/api/'
 let socket
 
 const App = () => {
