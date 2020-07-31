@@ -28,7 +28,7 @@ else{
 
 app.use(express.json())
 app.use(cors())
-app.use(path.resolve(__dirname, 'build'))
+app.use(express.static(path.resolve(__dirname, 'build')))
 
 
 
