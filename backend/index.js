@@ -36,6 +36,9 @@ const client_id = '8044283a858a43218c09deb9403590a1'
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET
 const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/'
 
+console.log('secret', client_secret);
+console.log('redirect', redirect_uri);
+
 let token = ''
 getClientCredToken()
 
