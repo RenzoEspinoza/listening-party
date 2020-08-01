@@ -106,6 +106,11 @@ const App = () => {
     .then(res => {
       setPoolList(res.data)
     })
+    .catch(error => {
+      console.log(error.response.data);
+      console.log(error.response.status)
+      console.log(error.response.headers)
+    })
   }
 
   function getCurrentSong(){
@@ -115,6 +120,10 @@ const App = () => {
         console.log(res.data)
         setCurrentSong(res.data)
       }
+    }).catch(error => {
+      console.log(error.response.data);
+      console.log(error.response.status)
+      console.log(error.response.headers)
     })
   }
 

@@ -11,6 +11,7 @@ const numCPUs = require('os').cpus().length;
 const isDev = process.env.NODE_ENV !== 'production'
 const PORT = process.env.PORT || 3001
 
+/*
 if (!isDev && cluster.isMaster) {
   console.error(`Node cluster master ${process.pid} is running`);
 
@@ -25,7 +26,8 @@ if (!isDev && cluster.isMaster) {
 
 }
 else{
-
+}
+*/  
 app.use(express.json())
 app.use(cors())
 app.use(express.static(path.resolve(__dirname, 'build')))
@@ -243,4 +245,3 @@ function sortPool() {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
-}
