@@ -10,6 +10,9 @@ import io from 'socket.io-client'
 
 const baseUrl = '/api/'
 let socket
+const socketURL = process.env.NODE_ENV === 'production'
+  ? window.location.hostname
+  : "https:localhost:3001"
 
 const App = () => {
   const [poolList, setPoolList] = useState([])
@@ -27,7 +30,7 @@ const App = () => {
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io()
+    socket = io().connect(socketURL, {secure: true})
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
