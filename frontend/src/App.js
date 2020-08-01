@@ -27,7 +27,7 @@ const App = () => {
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io('https://listening-party-reactapp.herokuapp.com/')
+    socket = io()
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
