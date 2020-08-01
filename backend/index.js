@@ -3,7 +3,8 @@ const cors = require('cors')
 const axios = require('axios')
 require('dotenv').config()
 const app = express()
-const io = require('socket.io')(app)
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
 const path = require('path');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
@@ -35,8 +36,6 @@ const client_id = '8044283a858a43218c09deb9403590a1'
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET
 const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/'
 
-console.log('secret', client_secret);
-console.log('redirect', redirect_uri);
 
 let token = ''
 getClientCredToken()
