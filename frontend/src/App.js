@@ -22,12 +22,15 @@ const App = () => {
   const accessToken = useRef(null)
   const loggedIn = useRef(false)
   const [refreshToken, setRefreshToken] = useState(null)
-
+  const socketURL = process.env.NODE_ENV === 'production'
+  ? window.location.hostname
+  : "https:localhost:3001"
 
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io().connect()
+    socket = io().connect(socketURL, {transports: ['websocket'],
+    upgrade: false})
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
