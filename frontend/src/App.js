@@ -30,8 +30,7 @@ const App = () => {
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    console.log(socketURL);
-    socket = io(window.location.hostname)
+    socket = io()
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
