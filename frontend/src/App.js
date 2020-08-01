@@ -27,7 +27,7 @@ const App = () => {
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io()
+    socket = io().connect()
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
