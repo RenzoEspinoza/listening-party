@@ -29,7 +29,8 @@ const App = () => {
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io().connect(socketURL+':'+port, {transports: ['websocket'],
+    console.log(port);
+    socket = io(socketURL+':'+port, {transports: ['websocket'],
     upgrade: false, secure:true})
     socket.on('pool update', pool => {
       setPoolList(pool)
