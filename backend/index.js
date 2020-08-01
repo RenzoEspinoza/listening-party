@@ -3,8 +3,7 @@ const cors = require('cors')
 const axios = require('axios')
 require('dotenv').config()
 const app = express()
-const server = require('http').createServer(app)
-const io = require('socket.io')(server)
+const io = require('socket.io')(app)
 const path = require('path');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
@@ -242,7 +241,7 @@ function sortPool() {
   })
 }
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 }

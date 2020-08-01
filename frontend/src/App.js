@@ -10,9 +10,6 @@ import io from 'socket.io-client'
 
 const baseUrl = '/api/'
 let socket
-const socketURL = process.env.NODE_ENV === 'production'
-  ? window.location.hostname
-  : "http:localhost:3001"
 
 const App = () => {
   const [poolList, setPoolList] = useState([])
