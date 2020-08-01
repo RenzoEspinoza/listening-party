@@ -25,11 +25,11 @@ const App = () => {
   const socketURL = process.env.NODE_ENV === 'production'
   ? window.location.hostname
   : "https:localhost:3001"
-
+  const port = process.env.PORT
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io().connect(socketURL, {transports: ['websocket'],
+    socket = io().connect(socketURL+':'+port, {transports: ['websocket'],
     upgrade: false, secure:true})
     socket.on('pool update', pool => {
       setPoolList(pool)
