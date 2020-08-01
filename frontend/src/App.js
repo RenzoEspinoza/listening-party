@@ -30,7 +30,7 @@ const App = () => {
     getSongPool()
     getCurrentSong()
     console.log(port);
-    socket = io({transports: ['websocket'],
+    socket = io(socketURL, {transports: ['websocket'],
     upgrade: false, secure:true})
     socket.on('pool update', pool => {
       setPoolList(pool)
