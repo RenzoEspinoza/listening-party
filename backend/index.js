@@ -65,7 +65,9 @@ function getClientCredToken(){
     setTimeout(getClientCredToken, res.data.expires_in * 1000)
     
   }).catch(error => {
-    console.log(error)
+    console.log(error.response.data);
+    console.log(error.response.status)
+    console.log(error.response.headers)
 }) 
 }
 
@@ -101,7 +103,9 @@ app.get('/auth/spotify/callback', (req, res) => {
     const uri = process.env.FRONTEND_URI || 'http://localhost:3000'
     res.redirect(uri + '?access_token=' + accessToken + '&refresh_token=' + refreshToken)
   }).catch(error => {
-    console.log(error);
+    console.log(error.response.data);
+    console.log(error.response.status)
+    console.log(error.response.headers)
   })
 })
 
@@ -127,7 +131,7 @@ app.get('/api/refreshToken/:refreshToken', (req, res) => {
   }).catch(error => {
     console.log(error.response.data);
     console.log(error.response.status)
-        console.log(error.response.headers)
+    console.log(error.response.headers)
   })
 })
 
@@ -137,7 +141,9 @@ app.get('/api/search/:query', (req, res) => {
   .then(response => {
     res.json(response.data.tracks.items)})
   .catch(error =>{
-    console.log(error);;
+    console.log(error.response.data);
+    console.log(error.response.status)
+    console.log(error.response.headers)
   })
 })
 

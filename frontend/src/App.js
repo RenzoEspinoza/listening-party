@@ -27,7 +27,7 @@ const App = () => {
   useEffect(() => {
     getSongPool()
     getCurrentSong()
-    socket = io('http://localhost:3001')
+    socket = io('https://listening-party-reactapp.herokuapp.com/')
     socket.on('pool update', pool => {
       setPoolList(pool)
     })
@@ -179,7 +179,7 @@ const App = () => {
     }).catch(error => {
       console.log(error.response.data);
       console.log(error.response.status)
-        console.log(error.response.headers)
+      console.log(error.response.headers)
     })
   }
 
