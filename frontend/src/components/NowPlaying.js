@@ -1,7 +1,7 @@
 import React from 'react'
 
 export default function NowPlaying(props){
-    const song = props.currentSong
+    const song = props.currentSong;
     
     function DisplaySong(){
         if(song){

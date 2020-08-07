@@ -15,19 +15,19 @@ const customStyles = {
   }
 };
 
-Modal.setAppElement('body')
+Modal.setAppElement('body');
 
 export default function AvailableDevices(props) {
   
   function openModal() {
-      props.setIsOpen(true)
+      props.setIsOpen(true);
   }
   function closeModal(){
-      props.setIsOpen(false)
+      props.setIsOpen(false);
   }
   
   function getDevices(){
-      props.getDevices()
+      props.getDevices();
   }
 
   return (
@@ -54,8 +54,8 @@ export default function AvailableDevices(props) {
 }
 function Device(props){
   function handleClick(){
-    props.closeModal()
-    props.startListening(props.id)
+    props.closeModal();
+    props.startListening(props.id);
   }
 
   return(

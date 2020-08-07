@@ -1,10 +1,10 @@
 import React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 function millisToMin(millis) {
-    const minutes = Math.floor(millis / 60000)
-    const seconds = ((millis % 60000) / 1000).toFixed(0)
-    return (seconds === 60 ? (minutes+1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds)
+    const minutes = Math.floor(millis / 60000);
+    const seconds = ((millis % 60000) / 1000).toFixed(0);
+    return (seconds === 60 ? (minutes+1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
 }
 
 function Song(props){
@@ -37,21 +37,21 @@ export function QueueSong(props){
 }
 
 export function PoolSong(props){
-    const [isClicked, setClicked] = useState(() => JSON.parse(sessionStorage.getItem(props.id)) || false)
+    const [isClicked, setClicked] = useState(() => JSON.parse(sessionStorage.getItem(props.id)) || false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         sessionStorage.setItem(props.id, JSON.stringify(isClicked))
       }, [isClicked]
     );
 
     const handleClick = e =>{
         if(isClicked){
-            props.voteUpdate(props.id, -1)
-            setClicked(false)
+            props.voteUpdate(props.id, -1);
+            setClicked(false);
         }
         else{
-            props.voteUpdate(props.id, 1)
-            setClicked(true)
+            props.voteUpdate(props.id, 1);
+            setClicked(true);
         }
     }
 
@@ -74,8 +74,8 @@ export function PoolSong(props){
 
 export function SearchResultSong(props){
     const handleClick= e => {
-        const songData={id:props.id, title:props.title, artist:props.artist, duration:props.duration, cover: props.cover}
-        props.addSong(songData)
+        const songData={id:props.id, title:props.title, artist:props.artist, duration:props.duration, cover: props.cover};
+        props.addSong(songData);
     }
     
     

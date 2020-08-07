@@ -1,15 +1,15 @@
-const express = require('express')
-const cors = require('cors')
-const axios = require('axios')
-require('dotenv').config()
-const app = express()
-const server = require('http').createServer(app)
-const io = require('socket.io')(server)
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+require('dotenv').config();
+const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 const path = require('path');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
-const isDev = process.env.NODE_ENV !== 'production'
-const PORT = process.env.PORT || 3001
+const isDev = process.env.NODE_ENV !== 'production';
+const PORT = process.env.PORT || 3001;
 
 /*
 if (!isDev && cluster.isMaster) {
@@ -28,24 +28,24 @@ if (!isDev && cluster.isMaster) {
 else{
 }
 */  
-app.use(express.json())
-app.use(cors())
-app.use(express.static(path.resolve(__dirname, 'build')))
+app.use(express.json());
+app.use(cors());
+app.use(express.static(path.resolve(__dirname, 'build')));
 
 
 
-const client_id = '8044283a858a43218c09deb9403590a1'
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET
-const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/'
+const client_id = '8044283a858a43218c09deb9403590a1';
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/';
 
 
-let token = ''
-getClientCredToken()
+let token = '';
+getClientCredToken();
 
 
-let pool = []
-let currentlyPlaying = null
-let timeStarted = null
+let pool = [];
+let currentlyPlaying = null;
+let timeStarted = null;
 
 function getClientCredToken(){
   axios({
@@ -68,16 +68,17 @@ function getClientCredToken(){
     console.log(error.response.data);
     console.log(error.response.status)
     console.log(error.response.headers)
-}) 
+});
 }
 
 app.get('/auth/spotify', (req,res) => {
-  const scopes = 'user-modify-playback-state user-read-playback-state'
+  const scopes = 'user-modify-playback-state user-read-playback-state';
   res.redirect('https://accounts.spotify.com/authorize' +
   '?response_type=code' +
   '&client_id=' + client_id +
   (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-  '&redirect_uri=' + encodeURIComponent(redirect_uri))
+  '&redirect_uri=' + encodeURIComponent(redirect_uri)
+  );
 })
 
 app.get('/auth/spotify/callback', (req, res) => {
@@ -98,19 +99,28 @@ app.get('/auth/spotify/callback', (req, res) => {
       ).toString('base64'))
     }
   }).then(response => {
-    const accessToken = response.data.access_token
-    const refreshToken = response.data.refresh_token
-    const uri = process.env.FRONTEND_URI || 'http://localhost:3000'
-    res.redirect(uri + '?access_token=' + accessToken + '&refresh_token=' + refreshToken)
+    const accessToken = response.data.access_token;
+    const refreshToken = response.data.refresh_token;
+    const uri = process.env.FRONTEND_URI || 'http://localhost:3000';
+    const dayToSeconds = 24*60*60;
+    res.cookie('accessToken', accessToken,
+      {maxAge: dayToSeconds, httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' ? true : false}
+    );
+    res.cookie('refreshToken', refreshToken,
+      {maxAge: dayToSeconds, httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' ? true : false}
+    );
+    res.redirect(uri);
   }).catch(error => {
     console.log(error.response.data);
     console.log(error.response.status)
     console.log(error.response.headers)
-  })
+  });
 })
 
 app.get('/api/refreshToken/:refreshToken', (req, res) => {
-  const refreshToken = req.params.refreshToken
+  const refreshToken = req.params.refreshToken;
   console.log('refresh token', refreshToken);
   axios({
     url: 'https://accounts.spotify.com/api/token',
@@ -127,93 +137,93 @@ app.get('/api/refreshToken/:refreshToken', (req, res) => {
     }
   }).then(response => {
     console.log(response.data.access_token);
-    res.json(response.data.access_token)
+    res.json(response.data.access_token);
   }).catch(error => {
     console.log(error.response.data);
-    console.log(error.response.status)
-    console.log(error.response.headers)
-  })
+    console.log(error.response.status);
+    console.log(error.response.headers);
+  });
 })
 
 app.get('/api/search/:query', (req, res) => {
-  const query = encodeURIComponent(req.params.query)
+  const query = encodeURIComponent(req.params.query);
   axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {headers: {'Authorization': `Bearer ${token}`}})
   .then(response => {
-    res.json(response.data.tracks.items)})
+    res.json(response.data.tracks.items);})
   .catch(error =>{
     console.log(error.response.data);
-    console.log(error.response.status)
-    console.log(error.response.headers)
-  })
+    console.log(error.response.status);
+    console.log(error.response.headers);
+  });
 })
 
 app.get('/api/pool', (req, res) => {
-  res.json(pool)
+  res.json(pool);
 })
 
 app.get('/api/currentSong', (req, res) => {
-  res.json(currentlyPlaying)
+  res.json(currentlyPlaying);
 })
 
 app.get('/api/elapsedTime', (req, res) => {
-  const elapsedTime = Date.now() - timeStarted
-  res.json(elapsedTime)
+  const elapsedTime = Date.now() - timeStarted;
+  res.json(elapsedTime);
 })
 
 app.delete('/api/songs/:id', (req, res) => {
-  const id = req.params.id
-  songs = songs.filter(song => song.id !== id)
-  res.status(204).end()
+  const id = req.params.id;
+  songs = songs.filter(song => song.id !== id);
+  res.status(204).end();
 })
 
 app.post('/api/pool', (req, res) => {
-  const body = req.body
-  addSong(body)
-  res.status(204).end()
+  const body = req.body;
+  addSong(body);
+  res.status(204).end();
 })
 
 function songEnded() {
-  currentlyPlaying = pool.shift()
-  console.log('next song', currentlyPlaying)
+  currentlyPlaying = pool.shift();
+  console.log('next song', currentlyPlaying);
   if(currentlyPlaying){
-    io.emit('play song', currentlyPlaying)
-    setTimeout(songEnded, currentlyPlaying.duration)
+    io.emit('play song', currentlyPlaying);
+    setTimeout(songEnded, currentlyPlaying.duration);
   }
   else console.log('No song up next');
-  io.emit('pool update', pool)
+  io.emit('pool update', pool);
 }
 
 io.on('connection', socket => {
-  console.log('a user connected')
+  console.log('a user connected');
 
   socket.on('song add', (song, callback) => {
     if(!currentlyPlaying){
-      io.emit('play song', song)
-      currentlyPlaying = song
-      timeStarted = Date.now()
+      io.emit('play song', song);
+      currentlyPlaying = song;
+      timeStarted = Date.now();
       console.log('set time started', timeStarted);
-      setTimeout(songEnded, song.duration)
+      setTimeout(songEnded, song.duration);
       return
     }
-    const error = addSong(song)
-    if(error) return callback(error)
-    sortPool()
-    io.emit('pool update', pool)
+    const error = addSong(song);
+    if(error) return callback(error);
+    sortPool();
+    io.emit('pool update', pool);
   })
 
   socket.on('vote change', (id, vote) =>{
-    updateVote(id, vote)
-    sortPool()
-    io.emit('pool update', pool)
+    updateVote(id, vote);
+    sortPool();
+    io.emit('pool update', pool);
   })
 })
 
 
 
 function addSong(song) {
-  const duplicate = pool.some(s => s.id === song.id)
+  const duplicate = pool.some(s => s.id === song.id);
   if(duplicate){
-    return 'Error: song already exists in pool'
+    return 'Error: song already exists in pool';
   }
 
   const newSong = {
@@ -224,24 +234,24 @@ function addSong(song) {
     cover: song.cover,
     voteCount: 0,
     dateAdded: Date.now()
-  }
-  pool.push(newSong)
+  };
+  pool.push(newSong);
 }
 
 function updateVote(id, vote) {
-  pool = pool.map(song => {return (song.id === id) ? {...song, voteCount: (song.voteCount + vote)} : song})
+  pool = pool.map(song => {return (song.id === id) ? {...song, voteCount: (song.voteCount + vote)} : song});
 }
 
 function sortPool() {
   pool.sort(function(a,b) {
-    const voteA = a.voteCount
-    const voteB = b.voteCount
-    const dateA = a.dateAdded
-    const dateB = b.dateAdded
-    return (voteA > voteB) ? -1 : (voteA < voteB) ? 1 : (dateA > dateB) ? 1 : -1
-  })
+    const voteA = a.voteCount,
+      voteB = b.voteCount,
+      dateA = a.dateAdded,
+      dateB = b.dateAdded;
+    return (voteA > voteB) ? -1 : (voteA < voteB) ? 1 : (dateA > dateB) ? 1 : -1;
+  });
 }
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`);
 })

@@ -1,49 +1,48 @@
-import React, {useState, useEffect, useRef} from 'react'
-import SongSearch from './components/SongSearch'
-import SongPool from './components/SongPool'
-import {PoolSong, SearchResultSong} from './components/Song'
-import NowPlaying from './components/NowPlaying'
-import AvailableDevices from './components/AvailableDevices'
-import axios from 'axios'
-import io from 'socket.io-client'
+import React, {useState, useEffect, useRef} from 'react';
+import SongSearch from './components/SongSearch';
+import SongPool from './components/SongPool';
+import {PoolSong, SearchResultSong} from './components/Song';
+import NowPlaying from './components/NowPlaying';
+import AvailableDevices from './components/AvailableDevices';
+import axios from 'axios';
+import io from 'socket.io-client';
 
-
-const baseUrl = '/api/'
-let socket
+const baseUrl = '/api/';
+let socket;
 
 const App = () => {
-  const [poolList, setPoolList] = useState([])
-  const [searchResult, setSearchResult] = useState([])
-  const [currentSong, setCurrentSong] = useState(null)
-  const [deviceList, setDeviceList] = useState([])
-  const [modalIsOpen,setIsOpen] = useState(false)
+  const [poolList, setPoolList] = useState([]);
+  const [searchResult, setSearchResult] = useState([]);
+  const [currentSong, setCurrentSong] = useState(null);
+  const [deviceList, setDeviceList] = useState([]);
+  const [modalIsOpen,setIsOpen] = useState(false);
 
-  const activeDevice = useRef(null)
-  const accessToken = useRef(null)
-  const loggedIn = useRef(false)
-  const [refreshToken, setRefreshToken] = useState(null)
+  const activeDevice = useRef(null);
+  const accessToken = useRef(null);
+  const loggedIn = useRef(false);
+  const [refreshToken, setRefreshToken] = useState(null);
   const socketURL = process.env.NODE_ENV === 'production'
   ? window.location.hostname
-  : "https:localhost:3001"
-  const port = process.env.PORT
+  : "https:localhost:3001";
+  const port = process.env.PORT;
+
   useEffect(() => {
-    getSongPool()
-    getCurrentSong()
+    getSongPool();
+    getCurrentSong();
     console.log(port);
     socket = io(socketURL, {transports: ['websocket'],
     upgrade: false, secure:true})
     socket.on('pool update', pool => {
-      setPoolList(pool)
-    })
-    const params = new URLSearchParams(window.location.search)
-    console.log('params', params);
-    accessToken.current= params.get('access_token')
-    console.log('access token', accessToken.current)
+      setPoolList(pool);
+    });
+    const params = new URLSearchParams(window.location.search);
+    accessToken.current= params.get('access_token');
+    console.log('access token', accessToken.current);
     if(accessToken.current){
       loggedIn.current = true
       console.log('refresh token',new URLSearchParams(window.location.search).get('refresh_token'))
       setRefreshToken(new URLSearchParams(window.location.search).get('refresh_token'))
-    }
+    };
     socket.on('play song', song => {
       if(activeDevice.current){
         console.log('attempting to play')
@@ -51,24 +50,24 @@ const App = () => {
       }
       setCurrentSong(song)
       sessionStorage.removeItem(song.id)
-    })
+    });
     
-    return () => socket.disconnect()
-  }, [])
+    return () => socket.disconnect();
+  }, []);
 
   function addSong(songData){
-    setSearchResult(searchResult => searchResult.filter(song => song.id !== songData.id))
+    setSearchResult(searchResult => searchResult.filter(song => song.id !== songData.id));
     socket.emit('song add', songData, error => {
       if(error) {
         alert(error)
       }
-    })
+    });
   }
 
   function playSong(songId, position = 0, deviceId) {
-    let deviceParam
-    if(deviceId) deviceParam = {device_id : deviceId}
-    else (deviceParam = {})
+    let deviceParam;
+    if(deviceId) deviceParam = {device_id : deviceId};
+    else (deviceParam = {});
 
     axios({
       url: 'https://api.spotify.com/v1/me/player/play',
@@ -85,31 +84,31 @@ const App = () => {
       console.log(res)
     }).catch(error => {
       if (error.response) {
-        console.log(error.response.data)
+        console.log(error.response.data);
         if(error.response.data.error.message === "The access token expired"){
           console.log('expired token');
-          refreshUserToken()
-          playSong()
+          refreshUserToken();
+          playSong();
         }
-        console.log(error.response.status)
-        console.log(error.response.headers)
+        console.log(error.response.status);
+        console.log(error.response.headers);
       } else if (error.request) {
-        console.log(error.request)
+        console.log(error.request);
       } else {
-        console.log('Error', error.message)
+        console.log('Error', error.message);
       }
-    })
+    });
   }
 
   function getSongPool(){
     axios.get(baseUrl + 'pool')
     .then(res => {
-      setPoolList(res.data)
+      setPoolList(res.data);
     })
     .catch(error => {
       console.log(error.response.data);
-      console.log(error.response.status)
-      console.log(error.response.headers)
+      console.log(error.response.status);
+      console.log(error.response.headers);
     })
   }
 
@@ -117,45 +116,42 @@ const App = () => {
     axios.get(baseUrl + 'currentSong')
     .then(res => {
       if(res.data) {
-        console.log(res.data)
-        setCurrentSong(res.data)
+        console.log(res.data);
+        setCurrentSong(res.data);
       }
     }).catch(error => {
       console.log(error.response.data);
-      console.log(error.response.status)
-      console.log(error.response.headers)
-    })
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    });
   }
 
   function search(input){
     axios.get(baseUrl + `search/${input}`)
     .then(res => {
-      console.log(res.data)
+      console.log(res.data);
       const searchResult = res.data.map(song => {
         return ({id : song.id, title: song.name, artist: song.artists[0].name, duration: song.duration_ms, cover: song.album.images[0].url})
-      })
-      console.log('search result', searchResult)
-      setSearchResult(searchResult)
-    })
-    
+      });
+      console.log('search result', searchResult);
+      setSearchResult(searchResult);
+    });
   }
 
   function voteUpdate(id,vote){
-    socket.emit('vote change', id, vote)
+    socket.emit('vote change', id, vote);
   }
 
   function startListening(deviceId){
-    activeDevice.current = deviceId
+    activeDevice.current = deviceId;
     axios.get(baseUrl + 'elapsedTime')
     .then(res => {
       playSong(currentSong.id, res.data, activeDevice.current)
-    })
+    });
   }
   
   
   function getAvailableDevices(){
-    let devices
-    
     axios({
       url: 'https://api.spotify.com/v1/me/player/devices',
       method: 'GET',
@@ -182,7 +178,7 @@ const App = () => {
       } else {
         console.log('Error', error.message)
       }
-    })
+    });
   }
 
   function refreshUserToken(){
@@ -193,14 +189,14 @@ const App = () => {
       console.log(error.response.data);
       console.log(error.response.status)
       console.log(error.response.headers)
-    })
+    });
   }
 
   const poolComponentList = poolList.map(song => (
-      <PoolSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} voteCount={song.voteCount} voteUpdate={voteUpdate} cover = {song.cover} key={song.id} />))
+      <PoolSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} voteCount={song.voteCount} voteUpdate={voteUpdate} cover = {song.cover} key={song.id} />));
 
   const searchComponentList = searchResult.map(song => (
-        <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} cover={song.cover} />))
+        <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} cover={song.cover} />));
   
   return (
     

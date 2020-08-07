@@ -3,15 +3,15 @@ import Scrollbars from "react-custom-scrollbars"
 import { useState } from "react"
 
 export default function SongSearch(props){
-    const [query, setQuery] = useState('')
+    const [query, setQuery] = useState('');
 
     function handleSubmit(e) {
-        e.preventDefault()
-        if(query.length > 0) props.search(query)
+        e.preventDefault();
+        if(query.length > 0) props.search(query);
     }
 
     function handleChange(e) {
-        setQuery(e.target.value)
+        setQuery(e.target.value);
     }
     return(
         <div class=" max-w-sm  pl-4 pr-2 shadow rounded-lg bg-white">
