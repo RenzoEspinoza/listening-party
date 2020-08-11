@@ -1,161 +1,47 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-require('dotenv').config();
+
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const path = require('path');
-const cluster = require('cluster');
+const session = require('express-session');
+const PORT = process.env.PORT || 3001;
+app.use(express.json());
+app.use(cors());
+app.use(express.static(path.resolve(__dirname, 'build')));
+/*
+app.use(session({
+  secret: 'cat',
+  })
+)
+const redis = require('redis');
+let RedisStore = require('connect-redis')(session);
+let redisClient = redis.createClient();
+*/
+/*const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 const isDev = process.env.NODE_ENV !== 'production';
-const PORT = process.env.PORT || 3001;
-
-/*
 if (!isDev && cluster.isMaster) {
   console.error(`Node cluster master ${process.pid} is running`);
-
   // Fork workers.
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
-
   cluster.on('exit', (worker, code, signal) => {
     console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
   });
-
 }
 else{
 }
-*/  
-app.use(express.json());
-app.use(cors());
-app.use(express.static(path.resolve(__dirname, 'build')));
-
-
-
-const client_id = '8044283a858a43218c09deb9403590a1';
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:3001/auth/spotify/callback/';
-
-
-let token = '';
-getClientCredToken();
-
+*/
+const spotify = require('./spotify');
+app.use('/spotify', spotify)
 
 let pool = [];
 let currentlyPlaying = null;
 let timeStarted = null;
 
-function getClientCredToken(){
-  axios({
-    url: 'https://accounts.spotify.com/api/token',
-    method: 'post',
-    params: {
-      grant_type: 'client_credentials',
-      client_id: client_id,
-      client_secret: client_secret
-    },
-    headers : {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }).then(res => {
-    token = res.data.access_token
-    console.log('token', token)
-    setTimeout(getClientCredToken, res.data.expires_in * 1000)
-    
-  }).catch(error => {
-    console.log(error.response.data);
-    console.log(error.response.status)
-    console.log(error.response.headers)
-});
-}
-
-app.get('/auth/spotify', (req,res) => {
-  const scopes = 'user-modify-playback-state user-read-playback-state';
-  res.redirect('https://accounts.spotify.com/authorize' +
-  '?response_type=code' +
-  '&client_id=' + client_id +
-  (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-  '&redirect_uri=' + encodeURIComponent(redirect_uri)
-  );
-})
-
-app.get('/auth/spotify/callback', (req, res) => {
-  const code = req.query.code || null
-  axios({
-    url: 'https://accounts.spotify.com/api/token',
-    method: 'POST',
-    params: {
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri
-    },
-    headers : {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + ( Buffer.from(
-        client_id+ ':' + client_secret
-      ).toString('base64'))
-    }
-  }).then(response => {
-    const accessToken = response.data.access_token;
-    const refreshToken = response.data.refresh_token;
-    const uri = process.env.FRONTEND_URI || 'http://localhost:3000';
-    const dayToSeconds = 24*60*60;
-    res.cookie('accessToken', accessToken,
-      {maxAge: dayToSeconds, httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' ? true : false}
-    );
-    res.cookie('refreshToken', refreshToken,
-      {maxAge: dayToSeconds, httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' ? true : false}
-    );
-    res.redirect(uri);
-  }).catch(error => {
-    console.log(error.response.data);
-    console.log(error.response.status)
-    console.log(error.response.headers)
-  });
-})
-
-app.get('/api/refreshToken/:refreshToken', (req, res) => {
-  const refreshToken = req.params.refreshToken;
-  console.log('refresh token', refreshToken);
-  axios({
-    url: 'https://accounts.spotify.com/api/token',
-    method: 'POST',
-    params: {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken
-    },
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + ( Buffer.from(
-        client_id+ ':' + client_secret
-      ).toString('base64'))
-    }
-  }).then(response => {
-    console.log(response.data.access_token);
-    res.json(response.data.access_token);
-  }).catch(error => {
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
-  });
-})
-
-app.get('/api/search/:query', (req, res) => {
-  const query = encodeURIComponent(req.params.query);
-  axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {headers: {'Authorization': `Bearer ${token}`}})
-  .then(response => {
-    res.json(response.data.tracks.items);})
-  .catch(error =>{
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
-  });
-})
 
 app.get('/api/pool', (req, res) => {
   res.json(pool);
