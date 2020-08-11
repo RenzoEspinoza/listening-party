@@ -1,0 +1,16 @@
+version: '3.6'
+
+services:
+    listening-party-api:
+        container_name: backend
+        # image: node:14.7.0
+        build: ./
+        command: npm run dev
+        working_dir: /listening-party-api
+        ports:
+            - "3001:3001"
+        volumes: 
+            - ./:/listening-party-api
+    redis:
+        image: redis
+
