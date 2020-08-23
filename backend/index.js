@@ -1,24 +1,42 @@
+require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-
 const app = express();
+const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const path = require('path');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.resolve(__dirname, 'build')));
-/*
-app.use(session({
-  secret: 'cat',
-  })
-)
+app.use(cookieParser());
 const redis = require('redis');
 let RedisStore = require('connect-redis')(session);
-let redisClient = redis.createClient();
+const redisClient = redis.createClient(process.env.REDIS_URI);
+redisClient.on('error', (err) => {
+  console.log('Redis error: ', err);
+});
+const spotify = require('./spotify');
+app.use('/spotify', spotify);
+console.log(process.env.SESSION_SECRET);
+/*
+app.use(session({
+  genid: (req) => {
+    return uuidv4();
+  },
+  store : new RedisStore({host: 'localhost', port: 6379, client: redisClient}),
+  name: 'redisDemoCookie',
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  cookie: {secure: false, maxAge:1500000}, // cookie is set to secure:false and expires in five minutes for development only
+  saveUninitialized: true
+  })
+);
 */
+
 /*const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 const isDev = process.env.NODE_ENV !== 'production';
@@ -35,8 +53,6 @@ if (!isDev && cluster.isMaster) {
 else{
 }
 */
-const spotify = require('./spotify');
-app.use('/spotify', spotify)
 
 let pool = [];
 let currentlyPlaying = null;

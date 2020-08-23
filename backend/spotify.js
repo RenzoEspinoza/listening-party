@@ -2,13 +2,30 @@ const express = require('express');
 const Router = express.Router;
 const axios = require('axios');
 require('dotenv').config();
-
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirect_uri = process.env.REDIRECT_URI;
 const frontendUri = process.env.FRONTEND_URI;
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr(process.env.CRYPTR_SECRET);
+const index = require('./index');
+const { response } = require('express');
 
 let spotify = Router();
+spotify.use('/device/', expiredTokenCheck);
+
+function expiredTokenCheck(req, res, next){
+  if(req.cookies.accessToken == undefined && req.cookies.refreshToken){
+    refreshAccessToken(req.cookies.refreshToken).then(newToken => {
+      console.log('new access token generated:', newToken);
+      req.cookies.accessToken = cryptr.encrypt(newToken);
+      next();
+    });
+  }
+  else{
+    next();
+  }
+}
 
 let clientToken = '';
 const getClientCredToken = () =>{
@@ -29,9 +46,7 @@ const getClientCredToken = () =>{
       setTimeout(getClientCredToken, res.data.expires_in * 1000)
       
     }).catch(error => {
-      console.log(error.response.data);
-      console.log(error.response.status)
-      console.log(error.response.headers)
+      printError(error);
   });
   }
 
@@ -69,25 +84,71 @@ spotify.get('/auth/callback', (req, res) => {
     const refreshToken = response.data.refresh_token;
     const expiresIn = response.data.expires_in;
     
+    console.log('user access token:', accessToken);
+    console.log('user refresh token:', refreshToken);
+    console.log('access token expires in:', expiresIn);
+
+    const encryptedAccessToken = cryptr.encrypt(accessToken)
+    const encryptedRefreshToken = cryptr.encrypt(refreshToken)
+    console.log('encrypted access token:', encryptedAccessToken);
+    console.log('encrypted refresh token:', encryptedRefreshToken);
+
     const dayToMilliSeconds = 24*60*60*1000;
-    res.cookie('accessToken', accessToken,
-      {maxAge: expiresIn}
+    res.cookie('accessToken', encryptedAccessToken,
+      {maxAge: expiresIn * 1000, httpOnly: true,  // expiresIn * 1000
+      secure: process.env.NODE_ENV === 'production' ? true : false}
     );
-    res.cookie('refreshToken', refreshToken,
-      {maxAge: dayToMilliSeconds * 14}
+    res.cookie('refreshToken', encryptedRefreshToken,
+      {maxAge: dayToMilliSeconds * 7, httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' ? true : false}
+    );
+    res.cookie('loggedIn', true,
+      {maxAge: dayToMilliSeconds * 7,
+      secure: false}
     );
     res.redirect(frontendUri);
   }).catch(error => {
-    console.log(error.response.data);
-    console.log(error.response.status)
-    console.log(error.response.headers)
+    printError(error);
   });
 })
 
-spotify.get('/auth/refresh', (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  console.log('refresh token', refreshToken);
-  axios({
+spotify.get('/search/:query', (req, res) => {
+  const query = encodeURIComponent(req.params.query);
+  axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {headers: {'Authorization': `Bearer ${clientToken}`}})
+  .then(response => {
+    res.json(response.data.tracks.items);
+  })
+  .catch(error =>{
+    printError(error);
+  });
+})
+
+spotify.get('/device/', (req,res) => {
+  console.log('access token:',req.cookies.accessToken);
+  const accessToken = cryptr.decrypt(req.cookies.accessToken);
+  console.log('decrypted token:', accessToken);
+  getAvailableDevices(accessToken).then(deviceList =>{
+    console.log('list of devices:', deviceList);
+    res.json(deviceList);
+  }).catch(error => {
+    printError(error);
+  });
+})
+
+async function getAvailableDevices(accessToken){
+  return axios({
+    url: 'https://api.spotify.com/v1/me/player/devices',
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  }).then(res => res.data.devices)
+}
+
+async function refreshAccessToken(encryptedRefreshToken){
+  const refreshToken = cryptr.decrypt(encryptedRefreshToken);
+  console.log('refresh token:', refreshToken);
+  return axios({
     url: 'https://accounts.spotify.com/api/token',
     method: 'POST',
     params: {
@@ -100,26 +161,38 @@ spotify.get('/auth/refresh', (req, res) => {
         client_id+ ':' + client_secret
       ).toString('base64'))
     }
-  }).then(response => {
-    console.log(response.data.access_token);
-    res.json(response.data.access_token);
+  }).then(res => 
+    res.data.access_token
+  ).catch(error => {
+    printError(error);
+  });
+}
+
+spotify.post('/play/', (req, res) => {
+  const token = cryptr.decrypt(req.cookies.accessToken);
+  console.log('play req body', req.body);
+  axios({
+    url: 'https://api.spotify.com/v1/me/player/play',
+    method: 'PUT',
+    data: {
+      uris : [`spotify:track:${req.body.songId}`],
+      position_ms : req.body.position
+    },
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    params: req.body.deviceParam
+  }).then(response =>{
+    printError(response);
   }).catch(error => {
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
+    printError(error);
   });
 })
 
-spotify.get('/search/:query', (req, res) => {
-  const query = encodeURIComponent(req.params.query);
-  axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {headers: {'Authorization': `Bearer ${clientToken}`}})
-  .then(response => {
-    res.json(response.data.tracks.items);})
-  .catch(error =>{
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
-  });
-})
+function printError(error){
+  console.log(error.response.data);
+  console.log(error.response.status);
+  console.log(error.response.headers);
+}
 
 module.exports = spotify;

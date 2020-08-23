@@ -18,9 +18,7 @@ const App = () => {
   const [modalIsOpen,setIsOpen] = useState(false);
 
   const activeDevice = useRef(null);
-  const accessToken = useRef(null);
   const loggedIn = useRef(false);
-  const [refreshToken, setRefreshToken] = useState(null);
   const backendURL = process.env.NODE_ENV === 'production'
   ? 'http://listening-party-reactapp.herokuapp.com/'
   : "http://localhost:3001";
@@ -35,15 +33,9 @@ const App = () => {
     socket.on('pool update', pool => {
       setPoolList(pool);
     });
-    /*
-    if (document.cookie.split(';').some((item) => item.trim().startsWith('accessToken='))) {
+    if (document.cookie.split(';').some((item) => item.trim().startsWith('loggedIn='))) {
       console.log('The cookie exists', document.cookie)
-    }
-    */
-    if(accessToken.current){
-      loggedIn.current = true
-      console.log('refresh token',new URLSearchParams(window.location.search).get('refresh_token'))
-      setRefreshToken(new URLSearchParams(window.location.search).get('refresh_token'))
+      loggedIn.current = true;
     };
     socket.on('play song', song => {
       if(activeDevice.current){
@@ -51,7 +43,6 @@ const App = () => {
         playSong(song.id)
       }
       setCurrentSong(song)
-      sessionStorage.removeItem(song.id)
     });
     
     return () => socket.disconnect();
@@ -65,52 +56,13 @@ const App = () => {
       }
     });
   }
-
-  function playSong(songId, position = 0, deviceId) {
-    let deviceParam;
-    if(deviceId) deviceParam = {device_id : deviceId};
-    else (deviceParam = {});
-
-    axios({
-      url: 'https://api.spotify.com/v1/me/player/play',
-      method: 'PUT',
-      data: {
-        uris : [`spotify:track:${songId}`],
-        position_ms : position
-      },
-      headers: {
-        'Authorization': `Bearer ${accessToken.current}`
-      },
-      params: deviceParam
-    }).then(res =>{
-      console.log(res)
-    }).catch(error => {
-      if (error.response) {
-        console.log(error.response.data);
-        if(error.response.data.error.message === "The access token expired"){
-          console.log('expired token');
-          refreshUserToken();
-          playSong();
-        }
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        console.log(error.request);
-      } else {
-        console.log('Error', error.message);
-      }
-    });
-  }
-
   function getSongPool(){
     axios.get(baseUrl + 'pool')
     .then(res => {
       setPoolList(res.data);
     })
     .catch(error => {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      printError(error);
     })
   }
 
@@ -122,25 +74,20 @@ const App = () => {
         setCurrentSong(res.data);
       }
     }).catch(error => {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      printError(error);
     });
   }
 
   function search(input){
     axios.get('/spotify/' + `search/${input}`)
     .then(res => {
-      console.log(res.data);
       const searchResult = res.data.map(song => {
         return ({id : song.id, title: song.name, artist: song.artists[0].name, duration: song.duration_ms, cover: song.album.images[0].url})
       });
       console.log('search result', searchResult);
       setSearchResult(searchResult);
     }).catch(error => {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      printError(error);
     });
   }
 
@@ -148,54 +95,36 @@ const App = () => {
     socket.emit('vote change', id, vote);
   }
 
+  function getAvailableDevices(){
+    axios.get('/spotify/device', {withCredentials: true})
+    .then(res => {
+      console.log('available devices:', res.data);
+      setDeviceList(res.data);
+      setIsOpen(true);
+    }).catch(error => {
+      printError(error);
+    })
+  }
+
+  async function playSong(songId, position = 0, deviceId) {
+    let deviceParam;
+    if(deviceId) deviceParam = {device_id : deviceId};
+    else (deviceParam = {});
+    const res = await axios.post('/spotify/play', {songId, position, deviceParam});
+  }
+
   function startListening(deviceId){
     activeDevice.current = deviceId;
     axios.get(baseUrl + 'elapsedTime')
     .then(res => {
-      playSong(currentSong.id, res.data, activeDevice.current)
-    });
-  }
-  
-  
-  function getAvailableDevices(){
-    axios({
-      url: 'https://api.spotify.com/v1/me/player/devices',
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken.current}`
-      }
-    }).then(res =>{
-      console.log('list of devices', res.data.devices)
-      setDeviceList(res.data.devices)
-      setIsOpen(true)
-    }).catch(error => {
-      if (error.response) {
-        console.log(error.response.data)
-        // "The access token expired"
-        if(error.response.data.error.message === "The access token expired"){
-          console.log('expired token');
-          refreshUserToken()
-          getAvailableDevices()
-        }
-        console.log(error.response.status)
-        console.log(error.response.headers)
-      } else if (error.request) {
-        console.log(error.request)
-      } else {
-        console.log('Error', error.message)
-      }
+      playSong(currentSong.id, res.data, activeDevice.current);
     });
   }
 
-  function refreshUserToken(){
-    axios.get(`refreshToken/${refreshToken}` )
-    .then(res => {
-      accessToken.current = res.data
-    }).catch(error => {
-      console.log(error.response.data);
-      console.log(error.response.status)
-      console.log(error.response.headers)
-    });
+  function printError(error){
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
   }
 
   const poolComponentList = poolList.map(song => (

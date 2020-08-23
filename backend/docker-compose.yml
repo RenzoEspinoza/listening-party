@@ -11,6 +11,12 @@ services:
             - "3001:3001"
         volumes: 
             - ./:/listening-party-api
+        links:
+            - redis
+        environment: 
+            REDIS_URI: redis://redis:6379
     redis:
         image: redis
+        ports: 
+            - "6379:6379"
 
