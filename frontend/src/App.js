@@ -7,7 +7,8 @@ import AvailableDevices from './components/AvailableDevices';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const baseUrl = '/api/';
+const baseUrl = process.env.NODE_ENV === 'production' ? 'http://listening-party-backend.herokuapp.com/api/' 
+: '/api/';
 let socket;
 
 const App = () => {
