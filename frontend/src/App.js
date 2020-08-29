@@ -20,7 +20,7 @@ const App = () => {
   const activeDevice = useRef(null);
   const loggedIn = useRef(false);
   const backendURL = process.env.NODE_ENV === 'production'
-  ? 'http://listening-party-reactapp.herokuapp.com/'
+  ? 'http://listening-party-backend.herokuapp.com/'
   : "http://localhost:3001";
   const port = process.env.PORT;
 
