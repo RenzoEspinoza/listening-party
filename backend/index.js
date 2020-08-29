@@ -11,17 +11,21 @@ const cookieParser = require('cookie-parser');
 const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors());
-// app.use(express.static(path.resolve(__dirname, 'build')));
 app.use(cookieParser());
+const spotify = require('./spotify');
+app.use('/spotify', spotify);
+console.log(process.env.SESSION_SECRET);
+// app.use(express.static(path.resolve(__dirname, 'build')));
+
+/*
 const redis = require('redis');
 let RedisStore = require('connect-redis')(session);
 const redisClient = redis.createClient(process.env.REDIS_URI);
 redisClient.on('error', (err) => {
   console.log('Redis error: ', err);
 });
-const spotify = require('./spotify');
-app.use('/spotify', spotify);
-console.log(process.env.SESSION_SECRET);
+*/
+
 /*
 app.use(session({
   genid: (req) => {

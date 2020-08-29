@@ -7,8 +7,8 @@ import AvailableDevices from './components/AvailableDevices';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const baseUrl = process.env.NODE_ENV === 'production' ? 'http://listening-party-backend.herokuapp.com/api/' 
-: '/api/';
+const baseUrl = 'http://listening-party-backend.herokuapp.com/api/' 
+//: '/api/';
 let socket;
 
 const App = () => {
@@ -20,9 +20,8 @@ const App = () => {
 
   const activeDevice = useRef(null);
   const loggedIn = useRef(false);
-  const backendURL = process.env.NODE_ENV === 'production'
-  ? 'http://listening-party-backend.herokuapp.com/'
-  : "http://localhost:3001";
+  const backendURL = 'http://listening-party-backend.herokuapp.com/'
+  //: "http://localhost:3001";
   const port = process.env.PORT;
 
   useEffect(() => {
