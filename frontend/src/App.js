@@ -136,7 +136,7 @@ const App = () => {
         <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} cover={song.cover} />));
   
   return (
-    <div class="flex justify-center">
+    <div class="flex justify-center h-screen">
       <div class="grid grid-cols-1 gap-4 w-full my-2 px-8 md:grid-cols-2 md:w-9/12 lg:w-8/12 xl:w-7/12">
       <div class="h-auto w-full md:col-span-2">
         <NowPlaying 
