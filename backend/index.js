@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors());
-app.use(express.static(path.resolve(__dirname, 'build')));
+// app.use(express.static(path.resolve(__dirname, 'build')));
 app.use(cookieParser());
 const redis = require('redis');
 let RedisStore = require('connect-redis')(session);
