@@ -115,8 +115,10 @@ spotify.get('/auth/callback', (req, res) => {
 
 spotify.get('/search/:query', (req, res) => {
   const query = encodeURIComponent(req.params.query);
+  console.log('search query:', query);
   axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {headers: {'Authorization': `Bearer ${clientToken}`}})
   .then(response => {
+    console.log('search response', response.data);
     res.json(response.data.tracks.items);
   })
   .catch(error =>{

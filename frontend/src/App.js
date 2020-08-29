@@ -7,8 +7,8 @@ import AvailableDevices from './components/AvailableDevices';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const baseUrl = 'http://listening-party-backend.herokuapp.com/api/' 
-//: '/api/';
+const backendURL = process.env.NODE_ENV === 'production' ? 'http://listening-party-backend.herokuapp.com/'
+  : "http://localhost:3001/";
 let socket;
 
 const App = () => {
@@ -20,8 +20,7 @@ const App = () => {
 
   const activeDevice = useRef(null);
   const loggedIn = useRef(false);
-  const backendURL = 'http://listening-party-backend.herokuapp.com/'
-  //: "http://localhost:3001";
+  
   const port = process.env.PORT;
 
   useEffect(() => {
@@ -57,7 +56,7 @@ const App = () => {
     });
   }
   function getSongPool(){
-    axios.get(baseUrl + 'pool')
+    axios.get(backendURL + 'api/pool')
     .then(res => {
       setPoolList(res.data);
     })
@@ -67,7 +66,7 @@ const App = () => {
   }
 
   function getCurrentSong(){
-    axios.get(baseUrl + 'currentSong')
+    axios.get(backendURL + 'api/currentSong')
     .then(res => {
       if(res.data) {
         console.log(res.data);
@@ -79,7 +78,7 @@ const App = () => {
   }
 
   function search(input){
-    axios.get('/spotify/' + `search/${input}`)
+    axios.get(backendURL + 'spotify/' + `search/${input}`)
     .then(res => {
       const searchResult = res.data.map(song => {
         return ({id : song.id, title: song.name, artist: song.artists[0].name, duration: song.duration_ms, cover: song.album.images[0].url})
@@ -96,7 +95,7 @@ const App = () => {
   }
 
   function getAvailableDevices(){
-    axios.get('/spotify/device', {withCredentials: true})
+    axios.get(backendURL + 'spotify/device', {withCredentials: true})
     .then(res => {
       console.log('available devices:', res.data);
       setDeviceList(res.data);
@@ -111,12 +110,12 @@ const App = () => {
     let deviceParam;
     if(deviceId) deviceParam = {device_id : deviceId};
     else (deviceParam = {});
-    const res = await axios.post('/spotify/play', {songId, position, deviceParam}).then(res => {console.log(res.data);}).catch(error => printError(error));
+    const res = await axios.post(backendURL + 'spotify/play', {songId, position, deviceParam}).then(res => {console.log(res.data);}).catch(error => printError(error));
   }
 
   function startListening(deviceId){
     activeDevice.current = deviceId;
-    axios.get(baseUrl + 'elapsedTime')
+    axios.get(backendURL + 'api/elapsedTime')
     .then(res => {
       console.log(res.data);
       playSong(currentSong.id, res.data, activeDevice.current);
@@ -136,7 +135,7 @@ const App = () => {
         <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} cover={song.cover} />));
   
   return (
-    <div class="flex justify-center h-screen">
+    <div class="flex justify-center">
       <div class="grid grid-cols-1 gap-4 w-full my-2 px-8 md:grid-cols-2 md:w-9/12 lg:w-8/12 xl:w-7/12">
       <div class="h-auto w-full md:col-span-2">
         <NowPlaying 
