@@ -32,8 +32,8 @@ export default function AvailableDevices(props) {
 
   return (
     <div>
-      <button onClick={getDevices} class=" focus:outline-none outline-none bg-transparent text-green-600 border border-green-600 font-bold py-2 px-4 rounded inline-flex items-center justify-center hover:bg-green-600 hover:border-transparent hover:text-white">
-          <span>Start listening with Spotify Connect</span> 
+      <button onClick={getDevices} class=" focus:outline-none outline-none bg-transparent text-green-600 border border-green-600 py-2 px-4 rounded inline-flex items-center justify-center hover:bg-green-600 hover:border-transparent hover:text-white">
+          <p class="font-bold lg:text-xl">Start listening with Spotify</p> 
       </button>
       <Modal
         isOpen={props.modalIsOpen}

@@ -6228,6 +6228,38 @@ video {
   height: 16rem;
 }
 
+.h-72 {
+  height: 18rem;
+}
+
+.h-80 {
+  height: 20rem;
+}
+
+.h-88 {
+  height: 22rem;
+}
+
+.h-96 {
+  height: 24rem;
+}
+
+.h-104 {
+  height: 26rem;
+}
+
+.h-112 {
+  height: 28rem;
+}
+
+.h-120 {
+  height: 30rem;
+}
+
+.h-128 {
+  height: 32rem;
+}
+
 .h-auto {
   height: auto;
 }
@@ -19964,6 +19996,38 @@ video {
 
   .sm\:h-64 {
     height: 16rem;
+  }
+
+  .sm\:h-72 {
+    height: 18rem;
+  }
+
+  .sm\:h-80 {
+    height: 20rem;
+  }
+
+  .sm\:h-88 {
+    height: 22rem;
+  }
+
+  .sm\:h-96 {
+    height: 24rem;
+  }
+
+  .sm\:h-104 {
+    height: 26rem;
+  }
+
+  .sm\:h-112 {
+    height: 28rem;
+  }
+
+  .sm\:h-120 {
+    height: 30rem;
+  }
+
+  .sm\:h-128 {
+    height: 32rem;
   }
 
   .sm\:h-auto {
@@ -33705,6 +33769,38 @@ video {
     height: 16rem;
   }
 
+  .md\:h-72 {
+    height: 18rem;
+  }
+
+  .md\:h-80 {
+    height: 20rem;
+  }
+
+  .md\:h-88 {
+    height: 22rem;
+  }
+
+  .md\:h-96 {
+    height: 24rem;
+  }
+
+  .md\:h-104 {
+    height: 26rem;
+  }
+
+  .md\:h-112 {
+    height: 28rem;
+  }
+
+  .md\:h-120 {
+    height: 30rem;
+  }
+
+  .md\:h-128 {
+    height: 32rem;
+  }
+
   .md\:h-auto {
     height: auto;
   }
@@ -47444,6 +47540,38 @@ video {
     height: 16rem;
   }
 
+  .lg\:h-72 {
+    height: 18rem;
+  }
+
+  .lg\:h-80 {
+    height: 20rem;
+  }
+
+  .lg\:h-88 {
+    height: 22rem;
+  }
+
+  .lg\:h-96 {
+    height: 24rem;
+  }
+
+  .lg\:h-104 {
+    height: 26rem;
+  }
+
+  .lg\:h-112 {
+    height: 28rem;
+  }
+
+  .lg\:h-120 {
+    height: 30rem;
+  }
+
+  .lg\:h-128 {
+    height: 32rem;
+  }
+
   .lg\:h-auto {
     height: auto;
   }
@@ -61181,6 +61309,38 @@ video {
 
   .xl\:h-64 {
     height: 16rem;
+  }
+
+  .xl\:h-72 {
+    height: 18rem;
+  }
+
+  .xl\:h-80 {
+    height: 20rem;
+  }
+
+  .xl\:h-88 {
+    height: 22rem;
+  }
+
+  .xl\:h-96 {
+    height: 24rem;
+  }
+
+  .xl\:h-104 {
+    height: 26rem;
+  }
+
+  .xl\:h-112 {
+    height: 28rem;
+  }
+
+  .xl\:h-120 {
+    height: 30rem;
+  }
+
+  .xl\:h-128 {
+    height: 32rem;
   }
 
   .xl\:h-auto {

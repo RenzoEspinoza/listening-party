@@ -34,15 +34,15 @@ const App = () => {
       setPoolList(pool);
     });
     if (document.cookie.split(';').some((item) => item.trim().startsWith('loggedIn='))) {
-      console.log('The cookie exists', document.cookie)
       loggedIn.current = true;
     };
     socket.on('play song', song => {
       if(activeDevice.current){
         console.log('attempting to play')
-        playSong(song.id)
+        playSong(song.id,0, activeDevice.current)
       }
       setCurrentSong(song)
+      sessionStorage.removeItem(song.id)
     });
     
     return () => socket.disconnect();
@@ -107,16 +107,18 @@ const App = () => {
   }
 
   async function playSong(songId, position = 0, deviceId) {
+    console.log(deviceId);
     let deviceParam;
     if(deviceId) deviceParam = {device_id : deviceId};
     else (deviceParam = {});
-    const res = await axios.post('/spotify/play', {songId, position, deviceParam});
+    const res = await axios.post('/spotify/play', {songId, position, deviceParam}).then(res => {console.log(res.data);}).catch(error => printError(error));
   }
 
   function startListening(deviceId){
     activeDevice.current = deviceId;
     axios.get(baseUrl + 'elapsedTime')
     .then(res => {
+      console.log(res.data);
       playSong(currentSong.id, res.data, activeDevice.current);
     });
   }
@@ -134,33 +136,32 @@ const App = () => {
         <SearchResultSong id={song.id} title={song.title} artist={song.artist} duration={song.duration} key={song.id} addSong={addSong} cover={song.cover} />));
   
   return (
-    
     <div class="flex justify-center">
-        <div class=" grid grid-rows-2 grid-cols-2" style={{gridTemplateRows: '36% auto'}}>
-          
-          <div class="col-span-2 p-2 pt-6">
-            <NowPlaying 
-              connect={loggedIn.current ?
-                (
-                  <AvailableDevices modalIsOpen={modalIsOpen} setIsOpen={setIsOpen} deviceList={deviceList} getDevices={getAvailableDevices} startListening={startListening} ></AvailableDevices>
-                ) : 
-                (
-                  <button onClick={() => {window.location.href= backendURL + '/spotify/auth'}} class="focus:outline-none outline-none bg-transparent text-green-600 border border-green-600 font-bold py-2 px-4 rounded inline-flex justify-center items-center hover:bg-green-600 hover:border-transparent hover:text-white">
-                    <svg class="fill-current w-6 h-6 mr-2 " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.098 10.638c-3.868-2.297-10.248-2.508-13.941-1.387-.593.18-1.22-.155-1.399-.748-.18-.593.154-1.22.748-1.4 4.239-1.287 11.285-1.038 15.738 1.605.533.317.708 1.005.392 1.538-.316.533-1.005.709-1.538.392zm-.126 3.403c-.272.44-.847.578-1.287.308-3.225-1.982-8.142-2.557-11.958-1.399-.494.15-1.017-.129-1.167-.623-.149-.495.13-1.016.624-1.167 4.358-1.322 9.776-.682 13.48 1.595.44.27.578.847.308 1.286zm-1.469 3.267c-.215.354-.676.465-1.028.249-2.818-1.722-6.365-2.111-10.542-1.157-.402.092-.803-.16-.895-.562-.092-.403.159-.804.562-.896 4.571-1.045 8.492-.595 11.655 1.338.353.215.464.676.248 1.028zm-5.503-17.308c-6.627 0-12 5.373-12 12 0 6.628 5.373 12 12 12 6.628 0 12-5.372 12-12 0-6.627-5.372-12-12-12z"/></svg>
-                    <span>Login with Spotify Premium to start listening</span>
-                  </button>
-                )
-              } currentSong={currentSong}>
-            </NowPlaying>
-          </div>
-          <div class="p-2 row-start-2">
-            <SongSearch search={search} componentList={searchComponentList}/>
-          </div>
-          <div class="p-2 row-start-2">
-            <SongPool componentList={poolComponentList}/>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 gap-4 w-full my-2 px-8 md:grid-cols-2 md:w-9/12 lg:w-8/12 xl:w-7/12">
+      <div class="h-auto w-full md:col-span-2">
+        <NowPlaying 
+          connect={loggedIn.current ?
+            (
+              <AvailableDevices modalIsOpen={modalIsOpen} setIsOpen={setIsOpen} deviceList={deviceList} getDevices={getAvailableDevices} startListening={startListening} ></AvailableDevices>
+            ) : 
+            (
+              <button onClick={() => {window.location.href= backendURL + '/spotify/auth'}} class="focus:outline-none outline-none bg-transparent text-green-600 border border-green-600 font-bold py-2 px-4 rounded inline-flex justify-center items-center hover:bg-green-600 hover:border-transparent hover:text-white">
+                <svg class="fill-current sm:w-8 sm:h-8  mr-2 " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.098 10.638c-3.868-2.297-10.248-2.508-13.941-1.387-.593.18-1.22-.155-1.399-.748-.18-.593.154-1.22.748-1.4 4.239-1.287 11.285-1.038 15.738 1.605.533.317.708 1.005.392 1.538-.316.533-1.005.709-1.538.392zm-.126 3.403c-.272.44-.847.578-1.287.308-3.225-1.982-8.142-2.557-11.958-1.399-.494.15-1.017-.129-1.167-.623-.149-.495.13-1.016.624-1.167 4.358-1.322 9.776-.682 13.48 1.595.44.27.578.847.308 1.286zm-1.469 3.267c-.215.354-.676.465-1.028.249-2.818-1.722-6.365-2.111-10.542-1.157-.402.092-.803-.16-.895-.562-.092-.403.159-.804.562-.896 4.571-1.045 8.492-.595 11.655 1.338.353.215.464.676.248 1.028zm-5.503-17.308c-6.627 0-12 5.373-12 12 0 6.628 5.373 12 12 12 6.628 0 12-5.372 12-12 0-6.627-5.372-12-12-12z"/></svg>
+                <p class="">Login with Spotify Premium to start listening</p>
+              </button>
+            )
+          } currentSong={currentSong}>
+        </NowPlaying>
+      </div>
+      <div class="h-72 md:h-96 lg:h-112 xl:h-128 w-full">
+        <SongPool componentList={poolComponentList}/>
+      </div>
+      <div class="h-72 md:h-96 lg:h-112 xl:h-128 w-full">
+        <SongSearch search={search} componentList={searchComponentList}/>
+      </div>
     </div>
+    </div>
+    
   )
 }
 

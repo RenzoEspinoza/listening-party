@@ -13,6 +13,7 @@ const { response } = require('express');
 
 let spotify = Router();
 spotify.use('/device/', expiredTokenCheck);
+spotify.use('/play', expiredTokenCheck);
 
 function expiredTokenCheck(req, res, next){
   if(req.cookies.accessToken == undefined && req.cookies.refreshToken){
@@ -170,7 +171,6 @@ async function refreshAccessToken(encryptedRefreshToken){
 
 spotify.post('/play/', (req, res) => {
   const token = cryptr.decrypt(req.cookies.accessToken);
-  console.log('play req body', req.body);
   axios({
     url: 'https://api.spotify.com/v1/me/player/play',
     method: 'PUT',
@@ -183,9 +183,12 @@ spotify.post('/play/', (req, res) => {
     },
     params: req.body.deviceParam
   }).then(response =>{
-    printError(response);
+    console.log(response.data);
+    res.end('success')
   }).catch(error => {
     printError(error);
+    console.log('Request data:', req.body);
+    res.status(500).send('Something broke!')
   });
 })
 
