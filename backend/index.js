@@ -10,7 +10,7 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const PORT = process.env.PORT || 3001;
 app.use(express.json());
-app.use(cors());
+app.use(cors({credentials: true, origin: process.env.FRONTEND_URI}));
 app.use(cookieParser());
 const spotify = require('./spotify');
 app.use('/spotify', spotify);

@@ -123,6 +123,7 @@ spotify.get('/search/:query', (req, res) => {
 })
 
 spotify.get('/device/', (req,res) => {
+  console.log('request headers', req.headers);
   console.log('get device cookies:', req.cookies);
   console.log('access token:',req.cookies.accessToken);
   const accessToken = cryptr.decrypt(req.cookies.accessToken);
@@ -132,6 +133,7 @@ spotify.get('/device/', (req,res) => {
     res.json(deviceList);
   }).catch(error => {
     printError(error);
+    res.status(500).send('Something broke!')
   });
 })
 
