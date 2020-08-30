@@ -97,11 +97,11 @@ spotify.get('/auth/callback', (req, res) => {
     const dayToMilliSeconds = 24*60*60*1000;
     res.cookie('accessToken', encryptedAccessToken,
       {maxAge: expiresIn * 1000, httpOnly: true,  // expiresIn * 1000
-      secure: false} //process.env.NODE_ENV === 'production' ? true : false
+      secure: false, sameSite: 'none'} //process.env.NODE_ENV === 'production' ? true : false
     );
     res.cookie('refreshToken', encryptedRefreshToken,
       {maxAge: dayToMilliSeconds * 7, httpOnly: true,
-      secure: false} //process.env.NODE_ENV === 'production' ? true : false
+      secure: false, sameSite: 'none'} //process.env.NODE_ENV === 'production' ? true : false
     );
     res.redirect(frontendUri + '?loggedIn=true');
   }).catch(error => {

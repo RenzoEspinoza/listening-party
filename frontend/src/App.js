@@ -98,14 +98,6 @@ const App = () => {
   }
 
   function getAvailableDevices(){
-    fetch(
-      backendURL + 'spotify/device', {credentials: 'include'}
-    ).then(res => {
-      console.log('fetching devices worked');
-      console.log(res.json());
-    }
-    )
-    /*
     axios.get(backendURL + 'spotify/device', {withCredentials: true})
     .then(res => {
       console.log('available devices:', res.data);
@@ -114,7 +106,6 @@ const App = () => {
     }).catch(error => {
       printError(error);
     })
-    */
   }
 
   async function playSong(songId, position = 0, deviceId) {
