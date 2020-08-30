@@ -103,11 +103,7 @@ spotify.get('/auth/callback', (req, res) => {
       {maxAge: dayToMilliSeconds * 7, httpOnly: true,
       secure: false} //process.env.NODE_ENV === 'production' ? true : false
     );
-    res.cookie('loggedIn', true,
-      {maxAge: dayToMilliSeconds * 7,
-      secure: false}
-    );
-    res.redirect(frontendUri);
+    res.redirect(frontendUri + '/?loggedIn=true');
   }).catch(error => {
     printError(error);
   });

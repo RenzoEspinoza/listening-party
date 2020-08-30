@@ -32,10 +32,12 @@ const App = () => {
     socket.on('pool update', pool => {
       setPoolList(pool);
     });
-    console.log(document.cookie);
-    if (document.cookie.split(';').some((item) => item.trim().startsWith('loggedIn='))) {
-      loggedIn.current = true;
-    };
+
+    const params = new URLSearchParams(window.location.search)
+    console.log('params', params);
+    loggedIn.current= params.get('loggedIn');
+    console.log(loggedIn.current);
+
     socket.on('play song', song => {
       if(activeDevice.current){
         console.log('attempting to play')
