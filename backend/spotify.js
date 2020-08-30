@@ -123,6 +123,7 @@ spotify.get('/search/:query', (req, res) => {
 })
 
 spotify.get('/device/', (req,res) => {
+  console.log('get device cookies:', req.cookies);
   console.log('access token:',req.cookies.accessToken);
   const accessToken = cryptr.decrypt(req.cookies.accessToken);
   console.log('decrypted token:', accessToken);

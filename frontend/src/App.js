@@ -98,7 +98,7 @@ const App = () => {
   }
 
   function getAvailableDevices(){
-    axios.get(backendURL + 'spotify/device', {withCredentials: true})
+    axios.get(backendURL + 'spotify/device', {withCredentials: true, crossDomain: true})
     .then(res => {
       console.log('available devices:', res.data);
       setDeviceList(res.data);
