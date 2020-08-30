@@ -98,7 +98,7 @@ const App = () => {
   }
 
   function getAvailableDevices(){
-    axios.get(backendURL + 'spotify/device', {withCredentials: true, crossDomain: true})
+    axios.get(backendURL + 'spotify/device', {}, {withCredentials: true, crossDomain: true})
     .then(res => {
       console.log('available devices:', res.data);
       setDeviceList(res.data);
@@ -122,6 +122,8 @@ const App = () => {
     .then(res => {
       console.log(res.data);
       playSong(currentSong.id, res.data, activeDevice.current);
+    }).catch(error => {
+      printError(error);
     });
   }
 
