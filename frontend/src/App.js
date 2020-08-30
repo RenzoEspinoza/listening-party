@@ -32,6 +32,7 @@ const App = () => {
     socket.on('pool update', pool => {
       setPoolList(pool);
     });
+    console.log(document.cookie);
     if (document.cookie.split(';').some((item) => item.trim().startsWith('loggedIn='))) {
       loggedIn.current = true;
     };
