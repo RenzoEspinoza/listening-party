@@ -7,7 +7,7 @@ import AvailableDevices from './components/AvailableDevices';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const backendURL = process.env.NODE_ENV === 'production' ? 'http://listening-party-backend.herokuapp.com/'
+const backendURL = process.env.NODE_ENV === 'production' ? 'https://listening-party-backend.herokuapp.com/'
   : "http://localhost:3001/";
 let socket;
 
@@ -20,15 +20,12 @@ const App = () => {
 
   const activeDevice = useRef(null);
   const loggedIn = useRef(false);
-  
-  const port = process.env.PORT;
+
 
   useEffect(() => {
     getSongPool();
     getCurrentSong();
-    console.log(port);
-    socket = io(backendURL, {transports: ['websocket'],
-    upgrade: false, secure:false})
+    socket = io(backendURL)
     socket.on('pool update', pool => {
       setPoolList(pool);
     });
