@@ -5,7 +5,6 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-const path = require('path');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const PORT = process.env.PORT || 3001;
@@ -40,24 +39,6 @@ app.use(session({
   })
 );
 */
-
-/*const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-const isDev = process.env.NODE_ENV !== 'production';
-if (!isDev && cluster.isMaster) {
-  console.error(`Node cluster master ${process.pid} is running`);
-  // Fork workers.
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
-  cluster.on('exit', (worker, code, signal) => {
-    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
-  });
-}
-else{
-}
-*/
-
 let pool = [];
 let currentlyPlaying = null;
 let timeStarted = null;

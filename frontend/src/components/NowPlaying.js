@@ -10,7 +10,7 @@ export default function NowPlaying(props){
                     <div class="w-1/3 mr-4">
                         <img src={song.cover} alt="album cover" class="w-32 md:w-48 lg:w-56" />
                     </div>
-                    <div class="w-2/3">
+                    <div class="w-2/3 overflow-hidden">
                         <div class="antialised" style={{overflow:'hidden', whiteSpace:'nowrap'}}>
                             <p class="text-gray-900 font-semibold pb-1 text-2xl md:text-3xl lg:text-4xl" >{song.title} </p>
                             <p class="text-gray-600 pb-1 text-xl md:text-2xl lg:text-3xl">{song.artist}</p>

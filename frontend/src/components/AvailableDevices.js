@@ -19,9 +19,6 @@ Modal.setAppElement('body');
 
 export default function AvailableDevices(props) {
   
-  function openModal() {
-      props.setIsOpen(true);
-  }
   function closeModal(){
       props.setIsOpen(false);
   }
